@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 import Layout from "./layout/Layout";
 import HomePage from "./pages/HomePage";
-import CreatePost from "./pages/CreatePost";
+import CreatePost from "./pages/CreatePost/CreatePost";
 import PageNotFound from "./pages/PageNotFound";
 import BlogPage from "./pages/BlogPage";
 import EditPost from "./pages/EditPost";
