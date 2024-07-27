@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TiWeatherSunny } from "react-icons/ti";
 import { MdOutlineDarkMode } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoIosLogIn, IoIosSearch } from "react-icons/io";
 import Search from "../pages/Search";
-import Signup from "../pages/auth/Signup";
-import LoginPage from "../pages/auth/LoginPage";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const TopnavBar = () => {
   const [showSearch, setShowSearch] = useState(false);
@@ -17,6 +17,8 @@ const TopnavBar = () => {
     const savedMode = localStorage.getItem("darkMode");
     return savedMode ? JSON.parse(savedMode) : false;
   });
+
+  const queryClient = useQueryClient();
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
@@ -43,20 +45,33 @@ const TopnavBar = () => {
     };
   }, [showSearch, setShowSearch]);
 
-  const [showLogin, setShowLogin] = useState(false);
-  const [showSignup, setShowSignup] = useState(false);
+  const navigate = useNavigate();
 
   const handleLoginClick = () => {
-    setShowLogin(true);
-    setShowSignup(false);
+    navigate("/login");
   };
 
-  const handleSignupClick = () => {
-    setShowSignup(true);
-    setShowLogin(false);
-  };
+  const { mutate: logout } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch("/api/auth/logout", {
+          method: "POST",
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Something went wrong!");
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["authUser"] });
+    },
+    onError: () => {
+      toast.error("Logout Failed");
+    },
+  });
 
-  const authuser = true;
+  const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
   return (
     <>
@@ -106,7 +121,7 @@ const TopnavBar = () => {
                 )}
               </button>
 
-              {authuser ? (
+              {authUser ? (
                 <div className="relative ml-3">
                   <div>
                     <button
@@ -120,7 +135,7 @@ const TopnavBar = () => {
                       <span className="sr-only">Open user menu</span>
                       <img
                         className="h-8 w-8 rounded-full"
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                        src={authUser?.profileImg}
                         alt="profile"
                       />
                     </button>
@@ -129,7 +144,7 @@ const TopnavBar = () => {
                   {isDropdownOpen && (
                     <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Link
-                        to={"/profile"}
+                        to={"/profile/:username"}
                         className="block px-4 py-2 text-sm text-gray-700"
                       >
                         Your Profile
@@ -140,7 +155,13 @@ const TopnavBar = () => {
                       >
                         Create Post
                       </Link>
-                      <button className="block px-4 py-2 text-sm text-gray-700">
+                      <button
+                        className="block px-4 py-2 text-sm text-gray-700"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          logout();
+                        }}
+                      >
                         Sign out
                       </button>
                     </div>
@@ -210,18 +231,6 @@ const TopnavBar = () => {
         </div>
       </nav>
       <Search show={showSearch} setShow={setShowSearch} />
-      {showLogin && (
-        <LoginPage
-          setShowLogin={setShowLogin}
-          handleSignupClick={handleSignupClick}
-        />
-      )}
-      {showSignup && (
-        <Signup
-          setShowSignup={setShowSignup}
-          handleLoginClick={handleLoginClick}
-        />
-      )}
     </>
   );
 };

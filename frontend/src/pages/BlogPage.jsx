@@ -18,7 +18,7 @@ const BlogPage = () => {
             <div className="mt-3 flex flex-row gap-3">
               <p className=" font-bold ">By : Prasanth | 12th May 2023</p>
               <Link
-                to={"/editpost/slug"}
+                to={"/editpost"}
                 className=" cursor-pointer hover:text-green-400"
               >
                 <MdEditDocument size={20} />
