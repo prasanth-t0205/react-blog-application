@@ -3,10 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { TiWeatherSunny } from "react-icons/ti";
 import { MdOutlineDarkMode } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { IoIosLogIn, IoIosSearch } from "react-icons/io";
+import { IoIosSearch } from "react-icons/io";
 import Search from "../pages/Search";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { IoNotificationsSharp } from "react-icons/io5";
+import { TbLogin2 } from "react-icons/tb";
 
 const TopnavBar = () => {
   const [showSearch, setShowSearch] = useState(false);
@@ -102,24 +104,29 @@ const TopnavBar = () => {
               </div>
             </div>
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-              <button
-                className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
-                onClick={() => setShowSearch(!showSearch)}
-              >
-                <span className="sr-only">Search</span>
-                <IoIosSearch size={24} />
-              </button>
-              <button
-                onClick={toggleDarkMode}
-                className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white  "
-              >
-                <span className="sr-only">Toggle dark mode</span>
-                {isDarkMode ? (
-                  <TiWeatherSunny size={25} />
-                ) : (
-                  <MdOutlineDarkMode size={25} />
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
+                  onClick={() => setShowSearch(!showSearch)}
+                >
+                  <span className="sr-only">Search</span>
+                  <IoIosSearch size={24} />
+                </button>
+                <button className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
+                  <IoNotificationsSharp size={24} />
+                </button>
+                <button
+                  onClick={toggleDarkMode}
+                  className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white  "
+                >
+                  <span className="sr-only">Toggle dark mode</span>
+                  {isDarkMode ? (
+                    <TiWeatherSunny size={25} />
+                  ) : (
+                    <MdOutlineDarkMode size={25} />
+                  )}
+                </button>
+              </div>
 
               {authUser ? (
                 <div className="relative ml-3">
@@ -144,13 +151,13 @@ const TopnavBar = () => {
                   {isDropdownOpen && (
                     <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Link
-                        to={"/profile/:username"}
+                        to={"/profile/" + authUser?.username}
                         className="block px-4 py-2 text-sm text-gray-700"
                       >
                         Your Profile
                       </Link>
                       <Link
-                        to={"/createpost"}
+                        to={"/create"}
                         className="block px-4 py-2 text-sm text-gray-700"
                       >
                         Create Post
@@ -173,7 +180,7 @@ const TopnavBar = () => {
                   onClick={handleLoginClick}
                 >
                   <span className="sr-only">Login</span>
-                  <IoIosLogIn size={25} />
+                  Login <TbLogin2 size={25} />
                 </button>
               )}
             </div>

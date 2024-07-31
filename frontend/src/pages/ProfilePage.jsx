@@ -1,10 +1,11 @@
 import { useState } from "react";
-
 import { Link } from "react-router-dom";
 import EditProfile from "../components/EditProfile";
+import BlogPosts from "../components/BlogPosts";
 
 const ProfilePage = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [activeTab, setActiveTab] = useState("myPosts");
 
   return (
     <>
@@ -28,19 +29,21 @@ const ProfilePage = () => {
           <hr className="my-6 border-t border-gray-300" />
         </div>
         <div className=" w-[75%]">
-          <div class="col-span-4 sm:col-span-9 ">
-            <div class="mt-4 flex flex-col items-center">
-              <h2 class="text-xl font-bold mb-4">About Me</h2>
-              <p class="  text-black dark:text-white">
+          <div className="col-span-4 sm:col-span-9 ">
+            <div className="mt-4 flex flex-col items-center">
+              <h2 className="text-xl font-bold mb-4">About Me</h2>
+              <p className="  text-black dark:text-white">
                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis
                 quisquam doloremque quo distinctio quis ratione saepe atque
                 quidem, ad dolorem, doloribus qui rerum. Quos magnam impedit
                 quod quis id aliquam.
               </p>
 
-              <h3 class="font-semibold text-center mt-3 -mb-2">Find me on</h3>
+              <h3 className="font-semibold text-center mt-3 -mb-2">
+                Find me on
+              </h3>
 
-              <div class="flex justify-center items-center gap-2 my-6">
+              <div className="flex justify-center items-center gap-2 my-6">
                 <Link
                   className="text-gray-400 dark:hover:text-white hover:text-black"
                   to={"/"}
@@ -48,6 +51,41 @@ const ProfilePage = () => {
                 ></Link>
               </div>
             </div>
+          </div>
+        </div>
+        <hr className="my-6 border-t border-gray-300 h-1" />
+        <div className="w-full px-10">
+          <div className="flex justify-center mb-4">
+            <button
+              className={`mx-2 px-4 py-2 ${
+                activeTab === "myPosts" ? "border-b-2 border-blue-500" : ""
+              }`}
+              onClick={() => setActiveTab("myPosts")}
+            >
+              My Posts
+            </button>
+            <button
+              className={`mx-2 px-4 py-2 ${
+                activeTab === "following" ? "border-b-2 border-blue-500" : ""
+              }`}
+              onClick={() => setActiveTab("following")}
+            >
+              Following
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {activeTab === "myPosts" ? (
+              <>
+                <BlogPosts />
+                <BlogPosts />
+                <BlogPosts />
+              </>
+            ) : (
+              <>
+                <BlogPosts />
+                <BlogPosts />
+              </>
+            )}
           </div>
         </div>
       </div>

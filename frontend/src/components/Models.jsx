@@ -2,7 +2,11 @@ import React from "react";
 import { BsExclamationLg } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 
-const Models = ({ show, setShow }) => {
+const Models = ({ show, setShow, onDelete }) => {
+  const handleDelete = () => {
+    onDelete();
+    setShow(false);
+  };
   return (
     <>
       {show && (
@@ -27,12 +31,14 @@ const Models = ({ show, setShow }) => {
                 <button
                   type="button"
                   className="text-white bg-red-600 hover:bg-red-800  font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center"
+                  onClick={handleDelete}
                 >
                   Yes, I'm sure
                 </button>
                 <button
                   type="button"
                   className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+                  onClick={() => setShow(!show)}
                 >
                   No, cancel
                 </button>

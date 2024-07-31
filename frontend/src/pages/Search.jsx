@@ -51,7 +51,7 @@ const Search = ({ show, setShow }) => {
           onClick={handleOverlayClick}
         >
           <div className="relative p-4 w-full max-w-md max-h-full">
-            <div class="w-full max-w-md p-6 m-auto mx-auto rounded-lg ">
+            <div className="w-full max-w-md p-6 m-auto mx-auto rounded-lg ">
               <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg px-3 py-2 mb-4">
                 <div className="flex items-center sticky top-0 bg-white dark:bg-gray-900 z-10">
                   <div className="pl-2">
