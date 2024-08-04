@@ -6,10 +6,22 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Posts from "../../components/Posts";
 import Loading from "../../components/Loading";
 import toast from "react-hot-toast";
+import { FaUser } from "react-icons/fa";
+import FollowList from "./FollowList";
+import {
+  RiFacebookBoxLine,
+  RiInstagramLine,
+  RiLinkedinBoxLine,
+  RiTwitterLine,
+  RiTwitterXFill,
+} from "react-icons/ri";
 
 const ProfilePage = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [activeTab, setActiveTab] = useState("myPosts");
+  const [showFollowList, setShowFollowList] = useState(false);
+  const [activeFollowTab, setActiveFollowTab] = useState("followers");
+
   const queryClient = useQueryClient();
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -59,7 +71,7 @@ const ProfilePage = () => {
   };
 
   const myProfile = authUser?._id === user?._id;
-  const iamFollowing = user?.followers.includes(authUser?._id);
+  const iamFollowing = authUser?.following.includes(user?._id);
 
   if (isLoading) return <Loading />;
 
@@ -78,26 +90,40 @@ const ProfilePage = () => {
                 <h1 className="text-xl font-bold">{user.fullname}</h1>
                 <p className="text-sm text-gray-500">@{user.username}</p>
                 <div className="mt-6 flex flex-wrap gap-4 justify-center">
-                  {myProfile && (
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
-                      onClick={() => setShowEditProfile(!showEditProfile)}
-                    >
-                      Edit Profile
-                    </button>
-                  )}
-                  {!myProfile && (
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                      onClick={handleFollow}
-                    >
-                      {isLoading
-                        ? "Loading..."
-                        : iamFollowing
-                        ? "unfollow"
-                        : "follow"}
-                    </button>
-                  )}
+                  <div className="flex gap-3">
+                    {myProfile && (
+                      <button
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded"
+                        onClick={() => setShowEditProfile(!showEditProfile)}
+                      >
+                        Edit Profile
+                      </button>
+                    )}
+                    {!myProfile && (
+                      <button
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        onClick={handleFollow}
+                      >
+                        {iamFollowing ? "Unfollow" : "Follow"}
+                      </button>
+                    )}
+                    <div className="relative mt-1.5 inline-block">
+                      <button
+                        onClick={() => setShowFollowList(!showFollowList)}
+                      >
+                        <FaUser />
+                      </button>
+                      {showFollowList && (
+                        <div className="absolute left-1/2 transform -translate-x-1/2 mt-2">
+                          <FollowList
+                            user={user}
+                            activeTab={activeFollowTab}
+                            onTabChange={setActiveFollowTab}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
               <hr className="my-6 border-t border-gray-300" />
@@ -114,16 +140,30 @@ const ProfilePage = () => {
                     Find me on
                   </h3>
 
-                  <div className="flex justify-center items-center gap-2 my-6">
-                    {user.link && (
-                      <Link
-                        className="text-gray-400 dark:hover:text-white hover:text-black"
-                        to={"https://www." + user.link}
-                        target="_blank"
-                      >
-                        {user.link}
-                      </Link>
-                    )}
+                  <div className="flex flex-row items-center gap-2 my-6">
+                    {user.socialLinks &&
+                      user.socialLinks.map((link, index) => (
+                        <Link
+                          key={index}
+                          className="text-gray-400 dark:hover:text-white hover:text-black flex items-center gap-2"
+                          to={`https://www.${link.platform}.com/${link.linkname}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {link.platform === "instagram" && (
+                            <RiInstagramLine size={20} />
+                          )}
+                          {link.platform === "x" && (
+                            <RiTwitterXFill size={20} />
+                          )}
+                          {link.platform === "facebook" && (
+                            <RiFacebookBoxLine size={20} />
+                          )}
+                          {link.platform === "linkedin" && (
+                            <RiLinkedinBoxLine />
+                          )}
+                        </Link>
+                      ))}
                   </div>
                 </div>
               </div>

@@ -5,11 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { FiEdit2 } from "react-icons/fi";
 import { RiImageAddFill } from "react-icons/ri";
 import { MdDelete } from "react-icons/md";
+import { RxCross2 } from "react-icons/rx";
+import { BiHide, BiShowAlt } from "react-icons/bi";
+import SocialLinkInput from "./SocialLinkInput";
+import toast from "react-hot-toast";
 
 const EditProfile = ({ show, setShow, authUser }) => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
   const [deleteProfileImage, setDeleteProfileImage] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState("");
 
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
@@ -17,7 +24,7 @@ const EditProfile = ({ show, setShow, authUser }) => {
     username: "",
     email: "",
     bio: "",
-    link: "",
+    socialLinks: [],
     profileImg: "",
     currentPassword: "",
     newPassword: "",
@@ -31,6 +38,7 @@ const EditProfile = ({ show, setShow, authUser }) => {
         const dataToSend = {
           ...formData,
           deleteProfileImage,
+          platform: selectedPlatform,
         };
         const res = await fetch(`/api/users/update`, {
           method: "POST",
@@ -52,7 +60,9 @@ const EditProfile = ({ show, setShow, authUser }) => {
       toast.success("Profile updated successfully!");
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-        queryClient.invalidateQueries({ queryKey: ["userProfile", username] }),
+        queryClient.invalidateQueries({
+          queryKey: ["userProfile", formData.username],
+        }),
       ]);
       navigate(`/profile/${data.username}`);
       if (data.username && data.username !== formData.username) {
@@ -89,6 +99,20 @@ const EditProfile = ({ show, setShow, authUser }) => {
     }
   };
 
+  const addSocialLink = (link) => {
+    setFormData((prev) => ({
+      ...prev,
+      socialLinks: [...prev.socialLinks, link],
+    }));
+  };
+
+  const removeSocialLink = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      socialLinks: prev.socialLinks.filter((_, i) => i !== index),
+    }));
+  };
+
   useEffect(() => {
     if (authUser) {
       setFormData({
@@ -96,11 +120,12 @@ const EditProfile = ({ show, setShow, authUser }) => {
         username: authUser.username,
         email: authUser.email,
         bio: authUser.bio,
-        link: authUser.link,
+        socialLinks: authUser.socialLinks || [],
         profileImg: authUser.profileImg,
         currentPassword: "",
         newPassword: "",
       });
+      setSelectedPlatform(authUser.platform || "");
     }
   }, [authUser]);
 
@@ -120,7 +145,12 @@ const EditProfile = ({ show, setShow, authUser }) => {
             >
               <div className="flex flex-col md:flex-row p-3 sm:p-4 md:p-6 gap-4">
                 <main className="flex-1">
-                  <h2 className="text-2xl font-bold mb-4">Public Profile</h2>
+                  <div className="flex justify-between gap-2">
+                    <h2 className="text-2xl font-bold mb-4">Profile</h2>
+                    <button onClick={() => setShow(false)}>
+                      <RxCross2 />
+                    </button>
+                  </div>
                   <div className="space-y-4">
                     <div className="flex justify-center mb-4">
                       <div className="relative w-24 h-24">
@@ -191,22 +221,48 @@ const EditProfile = ({ show, setShow, authUser }) => {
                       name="email"
                       onChange={handleProfileUpload}
                     />
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <input
-                        className="w-full col-span-2 p-2 dark:border-none border rounded dark:bg-[#181818]"
-                        placeholder="Social Link"
-                        type="text"
-                        name="link"
-                        value={formData.link}
-                        onChange={handleProfileUpload}
-                      />
-                      <select className="w-full p-2 border dark:border-none rounded dark:bg-[#181818]">
-                        <option value="">Select Platform</option>
-                        <option value="twitter">Twitter</option>
-                        <option value="facebook">Facebook</option>
-                        <option value="instagram">Instagram</option>
-                        <option value="linkedin">LinkedIn</option>
-                      </select>
+                    <SocialLinkInput
+                      links={formData.socialLinks}
+                      addLink={addSocialLink}
+                      removeLink={removeSocialLink}
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="relative">
+                        <input
+                          className="w-full p-2 border rounded dark:border-none dark:bg-[#181818]"
+                          placeholder="Current Password"
+                          type={showCurrentPassword ? "text" : "password"}
+                          name="currentPassword"
+                          value={formData.currentPassword}
+                          onChange={handleProfileUpload}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                          onClick={() =>
+                            setShowCurrentPassword(!showCurrentPassword)
+                          }
+                        >
+                          {showCurrentPassword ? <BiShowAlt /> : <BiHide />}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <input
+                          className="w-full p-2 border rounded dark:border-none dark:bg-[#181818]"
+                          placeholder="New Password"
+                          type={showNewPassword ? "text" : "password"}
+                          name="newPassword"
+                          value={formData.newPassword}
+                          onChange={handleProfileUpload}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                        >
+                          {showNewPassword ? <BiShowAlt /> : <BiHide />}
+                        </button>
+                      </div>
                     </div>
                     <textarea
                       className="w-full p-2 border dark:border-none rounded dark:bg-[#181818]"
@@ -216,6 +272,7 @@ const EditProfile = ({ show, setShow, authUser }) => {
                       value={formData.bio}
                       onChange={handleProfileUpload}
                     ></textarea>
+
                     <div className="flex justify-end">
                       <button className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
                         {isPendingProfile ? "updating..." : "Update"}

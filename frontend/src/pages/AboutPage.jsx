@@ -149,10 +149,14 @@ const AboutPage = () => {
                     and bringing ideas to life through code.
                   </p>
 
-                  <a className="mt-3 text-indigo-400 inline-flex items-center">
+                  <Link
+                    to={"https://github.com/prasanth0402"}
+                    target="_blank"
+                    className="mt-3 text-indigo-400 inline-flex items-center"
+                  >
                     Learn More
                     <FaLongArrowAltRight size={20} className="mt-1 ml-1" />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

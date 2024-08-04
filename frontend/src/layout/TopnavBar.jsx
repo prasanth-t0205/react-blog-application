@@ -144,12 +144,14 @@ const TopnavBar = () => {
                   <span className="sr-only">Search</span>
                   <IoIosSearch size={24} />
                 </button>
-                <button
-                  className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
-                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                >
-                  <IoNotificationsSharp size={24} />
-                </button>
+                {authUser && (
+                  <button
+                    className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
+                    onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                  >
+                    <IoNotificationsSharp size={24} />
+                  </button>
+                )}
                 <button
                   onClick={toggleDarkMode}
                   className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white  "

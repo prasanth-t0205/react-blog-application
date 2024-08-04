@@ -7,7 +7,10 @@ export const getUserProfile = async (req, res) => {
   const { username } = req.params;
 
   try {
-    const user = await User.findOne({ username }).select("-password");
+    const user = await User.findOne({ username })
+      .select("-password")
+      .populate("followers", "username profileImg")
+      .populate("following", "username profileImg");
     if (!user) return res.status(404).json({ error: "User not found" });
     return res.status(200).json({ user });
   } catch (error) {
@@ -41,7 +44,9 @@ export const followUnfollow = async (req, res) => {
         type: "follow",
         from: req.user._id,
         to: userToModify._id,
+        content: `${currentUser.username} started following you.`,
       });
+
       await notification.save();
 
       return res.status(200).json({ message: "Followed successfully" });
@@ -60,7 +65,7 @@ export const updateProfile = async (req, res) => {
     currentPassword,
     newPassword,
     bio,
-    link,
+    socialLinks,
     deleteProfileImage,
   } = req.body;
   let { profileImg } = req.body;
@@ -88,7 +93,7 @@ export const updateProfile = async (req, res) => {
         const publicId = user.profileImg.split("/").pop().split(".")[0];
         await cloudinary.uploader.destroy(publicId);
       }
-      user.profileImg = ""; // or set to a default image URL
+      user.profileImg = "";
     } else if (profileImg) {
       try {
         if (user.profileImg) {
@@ -99,7 +104,6 @@ export const updateProfile = async (req, res) => {
         user.profileImg = uploadResult.secure_url;
       } catch (cloudinaryError) {
         console.error("Cloudinary error:", cloudinaryError);
-        // Keep the existing image if upload fails
       }
     }
 
@@ -107,7 +111,7 @@ export const updateProfile = async (req, res) => {
     user.username = username || user.username;
     user.email = email || user.email;
     user.bio = bio || user.bio;
-    user.link = link || user.link;
+    user.socialLinks = socialLinks || user.socialLinks;
 
     await user.save();
     user.password = null;

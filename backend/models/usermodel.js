@@ -43,10 +43,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    link: {
-      type: String,
-      default: "",
-    },
+    socialLinks: [
+      {
+        platform: {
+          type: String,
+          enum: ["instagram", "x", "facebook", "linkedin"],
+        },
+        linkname: String,
+      },
+    ],
   },
   { timestamps: true }
 );
