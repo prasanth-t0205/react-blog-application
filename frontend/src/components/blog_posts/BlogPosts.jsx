@@ -1,19 +1,28 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const BlogPosts = ({ post }) => {
+const BlogPosts = ({ post, onView }) => {
   if (!post) return null;
 
   const postOwner = post.user;
   const formatedDate = new Date(post.createdAt);
 
+  const truncateContent = (content, maxLength) => {
+    if (content.length <= maxLength) return content;
+    return content.substr(0, maxLength) + "...";
+  };
+
+  const handleClick = () => {
+    onView(post._id);
+  };
+
   return (
-    <div className="container max-w-[50rem]  mx-auto">
+    <div className="container max-w-[50rem]  mx-auto" onClick={handleClick}>
       <div className="relative flex-col bg-clip-border rounded bg-transparent text-gray-700 shadow-none grid gap-2 item sm:grid-cols-2">
-        <div className="relative bg-clip-border rounded overflow-hidden bg-white text-gray-700 shadow-lg m-0">
-          <Link to={`/blog/${post._id}/${post.slug}`}>
+        <div className="relative bg-clip-border rounded overflow-hidden bg-white text-gray-700 shadow-lg m-0 h-64">
+          <Link to={`/blog/${post._id}`}>
             <img
-              src="https://bucket.material-tailwind.com/magic-ai/06b38f84f9669f766048c469ce861b81880378273a11ae9badaedfc32868ef44.jpg"
+              src={post.img}
               alt="Revolutionizing Our Production Process"
               className="object-cover w-full h-full"
             />
@@ -21,7 +30,7 @@ const BlogPosts = ({ post }) => {
         </div>
         <div className="p-6 px-2 sm:pr-6 sm:pl-4">
           <p className="block antialiased font-sans text-sm font-light leading-normal text-inherit mb-4 ">
-            Technology
+            {post.category}
           </p>
           <Link
             to={`/blog/${post._id}`}
@@ -31,11 +40,13 @@ const BlogPosts = ({ post }) => {
               ? post.title.substring(0, 38) + "..."
               : post.title}
           </Link>
-          <p className="block antialiased font-sans text-base leading-relaxed text-inherit mb-5 font-normal !text-gray-500">
-            {post.content.length > 170
-              ? post.content.substring(0, 170) + "..."
-              : post.content}
-          </p>
+          <p
+            className="block antialiased font-sans text-base leading-relaxed text-inherit mb-5 font-normal !text-gray-500"
+            dangerouslySetInnerHTML={{
+              __html: truncateContent(post.content, 150),
+            }}
+          />
+
           <div className="flex items-center gap-2">
             <p className="block antialiased font-sans text-base font-light leading-relaxed text-blue-gray-900 mb-0.5 ">
               <Link to={`/profile/${postOwner.username}`}>

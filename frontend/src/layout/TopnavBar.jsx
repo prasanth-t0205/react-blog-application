@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { TiWeatherSunny } from "react-icons/ti";
 import { MdOutlineDarkMode } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoIosSearch } from "react-icons/io";
-import Search from "../pages/Search";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import { IoNotificationsSharp } from "react-icons/io5";
 import { TbLogin2 } from "react-icons/tb";
+import toast from "react-hot-toast";
+import Search from "../pages/Search";
+import userImage from "../assets/user.png";
+import Notification from "../pages/Notification";
 
 const TopnavBar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -52,6 +55,9 @@ const TopnavBar = () => {
   const handleLoginClick = () => {
     navigate("/login");
   };
+  const handleExploreClick = () => {
+    navigate("/?explore=true");
+  };
 
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
@@ -75,6 +81,23 @@ const TopnavBar = () => {
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
+  const { data: posts } = useQuery({
+    queryKey: ["posts"],
+    queryFn: async () => {
+      try {
+        const res = await fetch("/api/posts");
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Something went wrong");
+        }
+        return data;
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+  });
+
   return (
     <>
       <nav className="dark:bg-[#212121] bg-white sticky top-0 z-50 border-y border-gray-900">
@@ -83,7 +106,7 @@ const TopnavBar = () => {
             <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
               <button
                 type="button"
-                className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                className="relative inline-flex items-center justify-center rounded-md p-2 dark:text-gray-400 dark:hover:text-white "
                 aria-controls="mobile-menu"
                 aria-expanded={isMobileMenuOpen}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -94,15 +117,24 @@ const TopnavBar = () => {
                 <GiHamburgerMenu size={25} />
               </button>
             </div>
-            <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+            <div className="flex items-center sm:hidden ml-10 mb-1">
+              <Link to={"/"}>
+                <h1 className="h-8 w-auto text-2xl dark:text-white text-black font-bold">
+                  Blog
+                </h1>
+              </Link>
+            </div>
+
+            <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start ">
               <div className="flex flex-shrink-0 items-center">
                 <Link to={"/"}>
-                  <h1 className="h-8 w-auto text-2xl dark:text-white text-black font-bold">
+                  <h1 className="h-8 w-auto text-2xl dark:text-white text-black font-bold hidden md:block">
                     Blog
                   </h1>
                 </Link>
               </div>
             </div>
+
             <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
               <div className="flex items-center gap-2">
                 <button
@@ -112,7 +144,10 @@ const TopnavBar = () => {
                   <span className="sr-only">Search</span>
                   <IoIosSearch size={24} />
                 </button>
-                <button className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
+                <button
+                  className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
+                  onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+                >
                   <IoNotificationsSharp size={24} />
                 </button>
                 <button
@@ -127,6 +162,7 @@ const TopnavBar = () => {
                   )}
                 </button>
               </div>
+              {isNotificationOpen && <Notification />}
 
               {authUser ? (
                 <div className="relative ml-3">
@@ -142,7 +178,7 @@ const TopnavBar = () => {
                       <span className="sr-only">Open user menu</span>
                       <img
                         className="h-8 w-8 rounded-full"
-                        src={authUser?.profileImg}
+                        src={authUser?.profileImg || userImage}
                         alt="profile"
                       />
                     </button>
@@ -180,7 +216,7 @@ const TopnavBar = () => {
                   onClick={handleLoginClick}
                 >
                   <span className="sr-only">Login</span>
-                  Login <TbLogin2 size={25} />
+                  <TbLogin2 size={25} />
                 </button>
               )}
             </div>
@@ -190,23 +226,24 @@ const TopnavBar = () => {
         {isMobileMenuOpen && (
           <div className="sm:hidden" id="mobile-menu">
             <div className="space-y-1 px-2 pb-3 pt-2">
-              <Link
+              <button
+                onClick={handleExploreClick}
                 className="block rounded-md  px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
                 aria-current="page"
               >
                 Explore
+              </button>
+              <Link
+                to={"/about"}
+                className="block rounded-md px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
+              >
+                About us
               </Link>
-              <Link className="block rounded-md px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
-                Software dev
-              </Link>
-              <Link className="block rounded-md px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
-                Cloud
-              </Link>
-              <Link className="block rounded-md px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
-                IT Ops
-              </Link>
-              <Link className="block rounded-md px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
-                Data
+              <Link
+                to={"/contact"}
+                className="block rounded-md px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
+              >
+                Contact us
               </Link>
             </div>
           </div>
@@ -216,28 +253,29 @@ const TopnavBar = () => {
 
         <div className="hidden sm:ml-6 sm:block">
           <div className="flex flex-row gap-7">
-            <Link
+            <button
+              onClick={handleExploreClick}
               className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
               aria-current="page"
             >
               Explore
+            </button>
+            <Link
+              to={"/about"}
+              className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
+            >
+              About us
             </Link>
-            <Link className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
-              Software dev
-            </Link>
-            <Link className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
-              Cloud
-            </Link>
-            <Link className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
-              IT Ops
-            </Link>
-            <Link className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white ">
-              Data
+            <Link
+              to={"/contact"}
+              className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
+            >
+              Contact us
             </Link>
           </div>
         </div>
       </nav>
-      <Search show={showSearch} setShow={setShowSearch} />
+      <Search show={showSearch} setShow={setShowSearch} posts={posts || []} />
     </>
   );
 };

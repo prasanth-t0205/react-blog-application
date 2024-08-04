@@ -35,7 +35,7 @@ export const deleteNotification = async (req, res) => {
     if (!notification) {
       return res.status(404).json({ error: "Notification not found" });
     }
-    if (notification.from.toString() !== userId.toString()) {
+    if (notification.to.toString() !== userId.toString()) {
       return res.status(403).json({ error: "Unauthorized" });
     }
 

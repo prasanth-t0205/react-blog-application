@@ -1,6 +1,6 @@
 import React from "react";
-import TopnavBar from "../components/TopnavBar";
-import Footer from "../components/Footer";
+import TopnavBar from "./TopnavBar";
+import Footer from "./Footer";
 import { Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 

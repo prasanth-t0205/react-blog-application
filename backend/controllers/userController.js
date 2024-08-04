@@ -53,8 +53,16 @@ export const followUnfollow = async (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-  const { fullname, username, email, currentPassword, newPassword, bio, link } =
-    req.body;
+  const {
+    fullname,
+    username,
+    email,
+    currentPassword,
+    newPassword,
+    bio,
+    link,
+    deleteProfileImage,
+  } = req.body;
   let { profileImg } = req.body;
 
   const userId = req.user._id;
@@ -62,15 +70,6 @@ export const updateProfile = async (req, res) => {
   try {
     let user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
-
-    if (
-      (!currentPassword && newPassword) ||
-      (currentPassword && !newPassword)
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Please enter both current and new password" });
-    }
 
     if (currentPassword && newPassword) {
       const isMatch = await bcrypt.compare(currentPassword, user.password);
@@ -83,14 +82,25 @@ export const updateProfile = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       user.password = await bcrypt.hash(newPassword, salt);
     }
-    if (profileImg) {
+
+    if (deleteProfileImage) {
       if (user.profileImg) {
-        await cloudinary.uploader.destroy(
-          user.profileImg.split("/").pop().split(".")[0]
-        );
+        const publicId = user.profileImg.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(publicId);
       }
-      const uploadImg = await cloudinary.uploader.upload(profileImg);
-      profileImg = uploadImg.secure_url;
+      user.profileImg = ""; // or set to a default image URL
+    } else if (profileImg) {
+      try {
+        if (user.profileImg) {
+          const publicId = user.profileImg.split("/").pop().split(".")[0];
+          await cloudinary.uploader.destroy(publicId);
+        }
+        const uploadResult = await cloudinary.uploader.upload(profileImg);
+        user.profileImg = uploadResult.secure_url;
+      } catch (cloudinaryError) {
+        console.error("Cloudinary error:", cloudinaryError);
+        // Keep the existing image if upload fails
+      }
     }
 
     user.fullname = fullname || user.fullname;
@@ -98,14 +108,15 @@ export const updateProfile = async (req, res) => {
     user.email = email || user.email;
     user.bio = bio || user.bio;
     user.link = link || user.link;
-    user.profileImg = profileImg || user.profileImg;
 
     await user.save();
     user.password = null;
 
     return res.status(200).json(user);
   } catch (error) {
-    console.log("Error in updateProfile Controller", error.message);
-    return res.status(500).json({ error: error.message });
+    console.error("Error in updateProfile Controller", error.message);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while updating the profile" });
   }
 };

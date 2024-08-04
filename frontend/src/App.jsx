@@ -1,15 +1,16 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { AiOutlineLoading } from "react-icons/ai";
 import Layout from "./layout/Layout";
 import HomePage from "./pages/HomePage";
-import CreatePost from "./pages/CreatePost/CreatePost";
 import PageNotFound from "./pages/PageNotFound";
-import EditPost from "./pages/EditPost";
-import ProfilePage from "./pages/ProfilePage";
-import { useQuery } from "@tanstack/react-query";
 import LoginPage from "./pages/auth/LoginPage";
 import Signup from "./pages/auth/Signup";
-import { AiOutlineLoading } from "react-icons/ai";
-import BlogPostPage from "./pages/BlogPostPage";
+import CreatePost from "./pages/Create_Edit_Post/CreatePost";
+import EditPost from "./pages/Create_Edit_Post/EditPost";
+import ProfilePage from "./pages/Profile/ProfilePage";
+import BlogPostPage from "./pages/blog/BlogPostPage";
+import AboutPage from "./pages/AboutPage";
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -63,6 +64,7 @@ function App() {
             path="/editpost/:id"
             element={authUser ? <EditPost /> : <Navigate to="/login" />}
           />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
           <Route path="/blog/:title" element={<BlogPostPage />} />
           <Route path="*" element={<PageNotFound />} />

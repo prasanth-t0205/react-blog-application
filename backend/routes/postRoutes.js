@@ -7,15 +7,21 @@ import {
   getFollowingPosts,
   getUserPosts,
   getSinglePost,
+  editPost,
+  commentPost,
+  deleteComment,
 } from "../controllers/postController.js";
 
 const router = express.Router();
 
-router.get("/all", getAllPosts);
+router.get("/", getAllPosts);
 router.get("/:id", getSinglePost);
-router.get("/following", protectRoute, getFollowingPosts);
+router.get("/following/:username", protectRoute, getFollowingPosts);
 router.get("/user/:username", protectRoute, getUserPosts);
 router.post("/create", protectRoute, createPost);
+router.put("/edit/:id", protectRoute, editPost);
 router.delete("/:id", protectRoute, deletePost);
+router.post("/comment/:id", protectRoute, commentPost);
+router.delete("/comment/:id/:commentId", protectRoute, deleteComment);
 
 export default router;

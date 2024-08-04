@@ -1,17 +1,39 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
-const PopularBlog = () => {
+const PopularBlog = ({ post, onView }) => {
+  const handleClick = () => {
+    onView(post._id);
+  };
+
+  const truncateContent = (content, maxLength) => {
+    return content.length > maxLength
+      ? content.slice(0, maxLength) + "..."
+      : content;
+  };
+
   return (
-    <div className="mb-4">
-      <h4 className="font-bold">Popular Blog Title</h4>
-      <p className="text-sm text-gray-600 line-clamp-2">
-        This is a brief description of the popular blog post. It will be limited
-        to two lines.
-      </p>
-      <div className="text-xs text-gray-500 mt-1">
-        <span>Username</span> • <span>2 hours ago</span>
+    <Link to={`/blog/${post._id}`} onClick={handleClick}>
+      <div>
+        <h4 className=" font-bold text-[25px]">{post.title}</h4>
+        <p
+          className="text-[17px] text-gray-400"
+          dangerouslySetInnerHTML={{
+            __html: truncateContent(post.content, 86),
+          }}
+        />
+
+        <p className="text-sm text-gray-500">
+          <Link
+            to={`/profile/${post.user.username}`}
+            className="text-blue-500 font-bold"
+          >
+            {post.user.username}
+          </Link>{" "}
+          • {new Date(post.createdAt).toLocaleDateString()}
+        </p>
       </div>
-    </div>
+    </Link>
   );
 };
 
