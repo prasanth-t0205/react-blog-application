@@ -4,6 +4,7 @@ import { RiInstagramFill } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useAuth } from "../../hooks/useAuth";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ const Signup = () => {
     email: "",
     password: "",
   });
+  const { signup } = useAuth();
 
   const navigate = useNavigate();
 
@@ -21,33 +23,9 @@ const Signup = () => {
     }
   };
 
-  const { mutate, isError, isPending, error } = useMutation({
-    mutationFn: async ({ fullname, username, email, password }) => {
-      try {
-        const res = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, fullname, email, password }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Something went wrong!");
-        console.log(data);
-        return data;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      toast.success("Signup Successful");
-    },
-  });
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutate(formData);
+    signup.mutate(formData);
   };
 
   const handleInputChange = (e) => {
@@ -152,12 +130,12 @@ const Signup = () => {
                   className="w-full px-6 py-2.5 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50"
                   type="submit"
                 >
-                  {isPending ? "Loading..." : "Signup"}
+                  {signup.isPending ? "Loading..." : "Signup"}
                 </button>
               </div>
-              {isError && (
+              {signup.isError && (
                 <p className="text-red-500 font-bold text-[12px] text-center mt-2">
-                  {error.message}
+                  {signup.error.message}
                 </p>
               )}
             </form>

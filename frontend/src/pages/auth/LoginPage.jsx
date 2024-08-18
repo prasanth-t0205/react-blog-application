@@ -2,43 +2,18 @@ import { FaGoogle } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { RiInstagramFill } from "react-icons/ri";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "../../hooks/useAuth";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
-
-  const queryClient = useQueryClient();
-
-  const { mutate, isError, isPending, error } = useMutation({
-    mutationFn: async ({ username, password }) => {
-      try {
-        const res = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Something went wrong!");
-        console.log(data);
-        return data;
-      } catch (error) {
-        console.log(error);
-        throw error;
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authUser"] });
-    },
-  });
+  const { login } = useAuth();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    mutate(formData);
+    login.mutate({ username: formData.username, password: formData.password });
   };
   const handleInputChange = (e) => {
     setFormData({
@@ -119,11 +94,11 @@ const LoginPage = () => {
 
               <div className="mt-6">
                 <button className="w-full px-6 py-2.5 text-sm font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-gray-800 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-50">
-                  {isPending ? "Loading..." : "Sign In"}
+                  {login.isPending ? "Loading..." : "Sign In"}
                 </button>
-                {isError && (
+                {login.isError && (
                   <div className="text-red-500 text-[12px] text-center mt-2 font-bold">
-                    {error.message}
+                    {login.error.message}
                   </div>
                 )}
               </div>

@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import userImage from "../../assets/user.png";
+
 const FollowList = ({ user, activeTab, onTabChange }) => {
   return (
     <div className="bg-white dark:bg-[#212121] rounded-md shadow-lg overflow-hidden z-20 w-full max-w-sm">
-      <div className="flex ">
+      <div className="flex">
         <button
           className={`flex-1 px-4 py-2 ${
             activeTab === "followers" ? "border-b-2 border-blue-500" : ""
@@ -38,7 +39,7 @@ const FollowList = ({ user, activeTab, onTabChange }) => {
               </div>
             ))
           : user.following.map((following) => (
-              <div key={following._id} className="flex items-center p-3 ">
+              <div key={following._id} className="flex items-center p-3">
                 <Link to={`/profile/${following.username}`}>
                   <img
                     src={following.profileImg || userImage}

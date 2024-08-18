@@ -12,7 +12,6 @@ import {
   RiFacebookBoxLine,
   RiInstagramLine,
   RiLinkedinBoxLine,
-  RiTwitterLine,
   RiTwitterXFill,
 } from "react-icons/ri";
 

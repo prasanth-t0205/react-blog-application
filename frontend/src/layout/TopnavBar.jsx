@@ -4,13 +4,14 @@ import { TiWeatherSunny } from "react-icons/ti";
 import { MdOutlineDarkMode } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoIosSearch } from "react-icons/io";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { IoNotificationsSharp } from "react-icons/io5";
 import { TbLogin2 } from "react-icons/tb";
 import toast from "react-hot-toast";
 import Search from "../pages/Search";
 import userImage from "../assets/user.png";
 import Notification from "../pages/Notification";
+import { useAuth } from "../hooks/useAuth";
 
 const TopnavBar = () => {
   const [showSearch, setShowSearch] = useState(false);
@@ -18,12 +19,12 @@ const TopnavBar = () => {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const { logout } = useAuth();
+
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedMode = localStorage.getItem("darkMode");
     return savedMode ? JSON.parse(savedMode) : false;
   });
-
-  const queryClient = useQueryClient();
 
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
@@ -59,25 +60,10 @@ const TopnavBar = () => {
     navigate("/?explore=true");
   };
 
-  const { mutate: logout } = useMutation({
-    mutationFn: async () => {
-      try {
-        const res = await fetch("/api/auth/logout", {
-          method: "POST",
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Something went wrong!");
-      } catch (error) {
-        throw new Error(error);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["authUser"] });
-    },
-    onError: () => {
-      toast.error("Logout Failed");
-    },
-  });
+  const handleLogout = (e) => {
+    e.preventDefault();
+    logout.mutate();
+  };
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
@@ -202,10 +188,7 @@ const TopnavBar = () => {
                       </Link>
                       <button
                         className="block px-4 py-2 text-sm text-gray-700"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          logout();
-                        }}
+                        onClick={handleLogout}
                       >
                         Sign out
                       </button>

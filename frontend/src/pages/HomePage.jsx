@@ -5,8 +5,8 @@ import BlogPosts from "../components/blog_posts/BlogPosts";
 import CategoryTag from "../components/CategoryTag";
 import PopularBlog from "../components/PopularBlog";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { useQuery } from "@tanstack/react-query";
 import Loading from "../components/Loading";
+import { useFetch } from "../hooks/useFetch";
 
 const HomePage = () => {
   const [searchParams] = useSearchParams();
@@ -26,17 +26,13 @@ const HomePage = () => {
   const [randomCategoryPosts, setRandomCategoryPosts] = useState({});
   const [randomPopularPosts, setRandomPopularPosts] = useState([]);
 
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ["posts", selectedCategory],
-    queryFn: async () => {
-      const url = selectedCategory
-        ? `/api/posts?category=${selectedCategory}`
-        : "/api/posts/";
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch posts");
-      return res.json();
-    },
-  });
+  const {
+    data: posts,
+    isLoading,
+    error,
+  } = useFetch(["posts", selectedCategory], () =>
+    selectedCategory ? `/api/posts?category=${selectedCategory}` : "/api/posts/"
+  );
 
   useEffect(() => {
     if (posts) {
