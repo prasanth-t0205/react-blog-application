@@ -42,6 +42,7 @@ export const createPost = async (req, res) => {
         from: userId,
         to: follower,
         type: "post",
+        content: `${user.username} created a new post: "${title}"`,
       });
       await newNotification.save();
     }

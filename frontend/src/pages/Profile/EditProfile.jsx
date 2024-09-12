@@ -1,24 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import userImage from "../../assets/user.png";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
 import { FiEdit2 } from "react-icons/fi";
 import { RiImageAddFill } from "react-icons/ri";
 import { MdDelete } from "react-icons/md";
 import { RxCross2 } from "react-icons/rx";
 import { BiHide, BiShowAlt } from "react-icons/bi";
 import SocialLinkInput from "./SocialLinkInput";
-import toast from "react-hot-toast";
+import { useEdit } from "../../hooks/useEdit";
 
 const EditProfile = ({ show, setShow, authUser }) => {
-  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
   const [deleteProfileImage, setDeleteProfileImage] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
 
-  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     fullname: "",
     username: "",
@@ -32,44 +28,7 @@ const EditProfile = ({ show, setShow, authUser }) => {
   const fileInputRef = useRef(null);
   const [open, setOpen] = useState(false);
 
-  const { mutate: updateProfile, isPending: isPendingProfile } = useMutation({
-    mutationFn: async () => {
-      try {
-        const dataToSend = {
-          ...formData,
-          deleteProfileImage,
-          platform: selectedPlatform,
-        };
-        const res = await fetch(`/api/users/update`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(dataToSend),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Something went wrong!");
-        }
-        return data;
-      } catch (error) {
-        throw new Error(error.message);
-      }
-    },
-    onSuccess: (data) => {
-      toast.success("Profile updated successfully!");
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["authUser"] }),
-        queryClient.invalidateQueries({
-          queryKey: ["userProfile", formData.username],
-        }),
-      ]);
-      navigate(`/profile/${data.username}`);
-      if (data.username && data.username !== formData.username) {
-        navigate(`/profile/${data.username}`);
-      }
-    },
-  });
+  const { mutate: updateProfile, isPending: isPendingProfile } = useEdit();
 
   const handleProfileUpload = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -140,7 +99,7 @@ const EditProfile = ({ show, setShow, authUser }) => {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                updateProfile();
+                updateProfile(formData);
               }}
             >
               <div className="flex flex-col md:flex-row p-3 sm:p-4 md:p-6 gap-4">

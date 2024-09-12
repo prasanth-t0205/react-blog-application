@@ -83,7 +83,7 @@ const ProfilePage = () => {
               <div className="flex flex-col items-center mt-4">
                 <img
                   src={user.profileImg || userImage}
-                  className="lg:w-32 lg:h-32 rounded-full mb-4 shrink-0 w-20 h-20"
+                  className="lg:w-32 lg:h-32 object-cover rounded-full mb-4 shrink-0 w-20 h-20"
                   alt={user.fullname}
                 />
                 <h1 className="text-xl font-bold">{user.fullname}</h1>

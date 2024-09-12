@@ -13,27 +13,27 @@ const PopularBlog = ({ post, onView }) => {
   };
 
   return (
-    <Link to={`/blog/${post._id}`} onClick={handleClick}>
-      <div>
-        <h4 className=" font-bold text-[25px]">{post.title}</h4>
+    <div>
+      <Link to={`/blog/${post._id}`} onClick={handleClick}>
+        <h4 className="font-bold text-[25px]">{post.title}</h4>
         <p
           className="text-[17px] text-gray-400"
           dangerouslySetInnerHTML={{
             __html: truncateContent(post.content, 86),
           }}
         />
+      </Link>
 
-        <p className="text-sm text-gray-500">
-          <Link
-            to={`/profile/${post.user.username}`}
-            className="text-blue-500 font-bold"
-          >
-            {post.user.username}
-          </Link>{" "}
-          • {new Date(post.createdAt).toLocaleDateString()}
-        </p>
-      </div>
-    </Link>
+      <p className="text-sm text-gray-500">
+        <Link
+          to={`/profile/${post.user.username}`}
+          className="text-blue-500 font-bold"
+        >
+          {post.user.username}
+        </Link>{" "}
+        • {new Date(post.createdAt).toLocaleDateString()}
+      </p>
+    </div>
   );
 };
 

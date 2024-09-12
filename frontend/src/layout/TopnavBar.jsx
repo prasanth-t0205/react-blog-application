@@ -165,7 +165,7 @@ const TopnavBar = () => {
                       <span className="absolute -inset-1.5"></span>
                       <span className="sr-only">Open user menu</span>
                       <img
-                        className="h-8 w-8 rounded-full"
+                        className="h-8 w-8 rounded-full object-cover"
                         src={authUser?.profileImg || userImage}
                         alt="profile"
                       />

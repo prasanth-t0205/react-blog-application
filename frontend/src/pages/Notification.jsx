@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 const Notification = () => {
   const queryClient = useQueryClient();
-  const { data: notifications, isLoading } = useQuery({
+  const { data: notifications } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
       try {
@@ -49,8 +49,7 @@ const Notification = () => {
     onError: (error) => toast.error(error.message),
   });
 
-  if (isLoading) return <div>Loading...</div>;
-  if (!notifications) return <div>No notifications</div>;
+  if (!notifications) return null;
   return (
     <div className="absolute right-0 top-full z-10 mt-1 w-80 origin-top-right rounded-md bg-white dark:bg-[#181818] py-0 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
       <div className="max-h-96 overflow-y-auto">
