@@ -1,7 +1,5 @@
 import React from "react";
 import { IoLogoReact } from "react-icons/io5";
-import { FiUser } from "react-icons/fi";
-import { Link } from "react-router-dom";
 
 const AboutPage = () => {
   return (
