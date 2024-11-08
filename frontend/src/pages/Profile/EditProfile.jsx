@@ -14,6 +14,8 @@ const EditProfile = ({ show, setShow, authUser }) => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState("");
+  const [open, setOpen] = useState(false);
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     fullname: "",
@@ -25,8 +27,6 @@ const EditProfile = ({ show, setShow, authUser }) => {
     currentPassword: "",
     newPassword: "",
   });
-  const fileInputRef = useRef(null);
-  const [open, setOpen] = useState(false);
 
   const { mutate: updateProfile, isPending: isPendingProfile } = useEdit();
 
@@ -50,12 +50,6 @@ const EditProfile = ({ show, setShow, authUser }) => {
     setSelectedImage(userImage);
     setFormData({ ...formData, profileImg: null });
     setDeleteProfileImage(true);
-  };
-
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      setShow(false);
-    }
   };
 
   const addSocialLink = (link) => {
@@ -91,154 +85,176 @@ const EditProfile = ({ show, setShow, authUser }) => {
   return (
     <>
       {show && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={handleOverlayClick}
-        >
-          <div className="bg-white w-full max-w-[90%] sm:max-w-md md:max-w-lg lg:max-w-2xl rounded-lg shadow-lg dark:bg-[#212121]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-0 sm:p-4">
+          <div className="bg-white dark:bg-[#212121] w-full h-full sm:h-auto sm:max-h-[90vh] sm:w-[95%] sm:max-w-[500px] lg:max-w-[600px] rounded-none sm:rounded-2xl shadow-xl overflow-auto">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 updateProfile(formData);
               }}
             >
-              <div className="flex flex-col md:flex-row p-3 sm:p-4 md:p-6 gap-4">
-                <main className="flex-1">
-                  <div className="flex justify-between gap-2">
-                    <h2 className="text-2xl font-bold mb-4">Profile</h2>
-                    <button onClick={() => setShow(false)}>
-                      <RxCross2 />
-                    </button>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex justify-center mb-4">
-                      <div className="relative w-24 h-24">
-                        <img
-                          className="w-full h-full rounded-full object-cover"
-                          src={
-                            selectedImage || authUser.profileImg || userImage
-                          }
-                          alt="Profile avatar"
-                        />
-                        <button
-                          type="button"
-                          className="absolute top-0 right-0 w-[27px] h-[27px] rounded-full bg-white flex items-center justify-center"
-                          onClick={() => setOpen(!open)}
-                        >
-                          <FiEdit2 size={15} color="#000" />
-                        </button>
-                        {open && (
-                          <div className="absolute flex gap-1 z-[999] w-[100%] left-24 -top-1 ">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleFileChange}
-                              ref={fileInputRef}
-                              style={{ display: "none" }}
-                            />
-                            <button
-                              type="button"
-                              className="w-[36px] h-[36px] rounded-full bg-transparent flex items-center justify-center"
-                              onClick={() => fileInputRef.current.click()}
-                            >
-                              <RiImageAddFill size={20} />
-                            </button>
-                            <button
-                              type="button"
-                              className="w-[36px] h-[36px] -ml-3 rounded-full bg-transparent flex items-center justify-center"
-                              onClick={handleDeleteImage}
-                            >
-                              <MdDelete size={20} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <input
-                        className="w-full p-2 border rounded dark:border-none dark:bg-[#181818]"
-                        placeholder="Full Name"
-                        type="text"
-                        name="fullname"
-                        value={formData.fullname}
-                        onChange={handleProfileUpload}
-                      />
-                      <input
-                        className="w-full p-2 border rounded dark:border-none dark:bg-[#181818] "
-                        placeholder="Username"
-                        type="text"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleProfileUpload}
-                      />
-                    </div>
-                    <input
-                      className="w-full p-2 border rounded dark:border-none dark:bg-[#181818]"
-                      type="email"
-                      placeholder="Email"
-                      value={formData.email}
-                      name="email"
-                      onChange={handleProfileUpload}
-                    />
-                    <SocialLinkInput
-                      links={formData.socialLinks}
-                      addLink={addSocialLink}
-                      removeLink={removeSocialLink}
-                    />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="relative">
-                        <input
-                          className="w-full p-2 border rounded dark:border-none dark:bg-[#181818]"
-                          placeholder="Current Password"
-                          type={showCurrentPassword ? "text" : "password"}
-                          name="currentPassword"
-                          value={formData.currentPassword}
-                          onChange={handleProfileUpload}
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                          onClick={() =>
-                            setShowCurrentPassword(!showCurrentPassword)
-                          }
-                        >
-                          {showCurrentPassword ? <BiShowAlt /> : <BiHide />}
-                        </button>
-                      </div>
-                      <div className="relative">
-                        <input
-                          className="w-full p-2 border rounded dark:border-none dark:bg-[#181818]"
-                          placeholder="New Password"
-                          type={showNewPassword ? "text" : "password"}
-                          name="newPassword"
-                          value={formData.newPassword}
-                          onChange={handleProfileUpload}
-                        />
-                        <button
-                          type="button"
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2"
-                          onClick={() => setShowNewPassword(!showNewPassword)}
-                        >
-                          {showNewPassword ? <BiShowAlt /> : <BiHide />}
-                        </button>
-                      </div>
-                    </div>
-                    <textarea
-                      className="w-full p-2 border dark:border-none rounded dark:bg-[#181818]"
-                      rows="3"
-                      placeholder="Bio"
-                      name="bio"
-                      value={formData.bio}
-                      onChange={handleProfileUpload}
-                    ></textarea>
+              <div className="sticky top-0 z-10 bg-white dark:bg-[#212121] px-4 py-3 border-b dark:border-gray-700 flex items-center justify-between">
+                <h2 className="text-xl font-bold">Edit Profile</h2>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    className="hidden sm:block px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700"
+                  >
+                    {isPendingProfile ? "Saving..." : "Save"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShow(false)}
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                  >
+                    <RxCross2 size={20} />
+                  </button>
+                </div>
+              </div>
 
-                    <div className="flex justify-end">
-                      <button className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-                        {isPendingProfile ? "updating..." : "Update"}
+              <div className="p-4 sm:p-6 pb-20 sm:pb-6 space-y-6">
+                <div className="flex justify-center">
+                  <div className="relative">
+                    <img
+                      className="w-28 h-28 rounded-full object-cover border-4 border-gray-100 dark:border-gray-800"
+                      src={selectedImage || authUser.profileImg || userImage}
+                      alt="Profile"
+                    />
+                    <button
+                      type="button"
+                      className="absolute bottom-0 right-0 p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:scale-110 transition"
+                      onClick={() => setOpen(!open)}
+                    >
+                      <FiEdit2 size={16} />
+                    </button>
+                    {open && (
+                      <div className="absolute left-full ml-2 top-0 flex gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          ref={fileInputRef}
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:scale-110 transition"
+                          onClick={() => fileInputRef.current.click()}
+                        >
+                          <RiImageAddFill size={20} />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-2 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:scale-110 transition"
+                          onClick={handleDeleteImage}
+                        >
+                          <MdDelete size={20} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <input
+                      className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#181818] focus:ring-2 focus:ring-indigo-500 transition"
+                      placeholder="Full Name"
+                      type="text"
+                      name="fullname"
+                      value={formData.fullname}
+                      onChange={handleProfileUpload}
+                    />
+                    <input
+                      className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#181818] focus:ring-2 focus:ring-indigo-500 transition"
+                      placeholder="Username"
+                      type="text"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleProfileUpload}
+                    />
+                  </div>
+
+                  <input
+                    className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#181818] focus:ring-2 focus:ring-indigo-500 transition"
+                    type="email"
+                    placeholder="Email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleProfileUpload}
+                  />
+
+                  <SocialLinkInput
+                    links={formData.socialLinks}
+                    addLink={addSocialLink}
+                    removeLink={removeSocialLink}
+                  />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="relative">
+                      <input
+                        className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#181818] focus:ring-2 focus:ring-indigo-500 transition pr-10"
+                        placeholder="Current Password"
+                        type={showCurrentPassword ? "text" : "password"}
+                        name="currentPassword"
+                        value={formData.currentPassword}
+                        onChange={handleProfileUpload}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                        onClick={() =>
+                          setShowCurrentPassword(!showCurrentPassword)
+                        }
+                      >
+                        {showCurrentPassword ? (
+                          <BiShowAlt size={20} />
+                        ) : (
+                          <BiHide size={20} />
+                        )}
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#181818] focus:ring-2 focus:ring-indigo-500 transition pr-10"
+                        placeholder="New Password"
+                        type={showNewPassword ? "text" : "password"}
+                        name="newPassword"
+                        value={formData.newPassword}
+                        onChange={handleProfileUpload}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? (
+                          <BiShowAlt size={20} />
+                        ) : (
+                          <BiHide size={20} />
+                        )}
                       </button>
                     </div>
                   </div>
-                </main>
+
+                  <textarea
+                    className="w-full p-3 rounded-lg bg-gray-50 dark:bg-[#181818] focus:ring-2 focus:ring-indigo-500 transition"
+                    rows="3"
+                    placeholder="Bio"
+                    name="bio"
+                    value={formData.bio}
+                    onChange={handleProfileUpload}
+                  />
+                </div>
+              </div>
+
+              <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-[#212121] border-t dark:border-gray-700 sm:hidden">
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  {isPendingProfile ? "Saving..." : "Save Changes"}
+                </button>
               </div>
             </form>
           </div>

@@ -15,9 +15,7 @@ const Posts = ({ feedType, username }) => {
         url = "/api/posts/";
       }
       const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error("Failed to fetch posts");
-      }
+      if (!res.ok) throw new Error("Failed to fetch posts");
       return res.json();
     },
   });
@@ -25,20 +23,15 @@ const Posts = ({ feedType, username }) => {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="flex flex-col w-full">
-      {posts && posts.length > 0 ? (
-        <div className="flex flex-wrap -mx-2">
+    <div className="max-w-7xl mx-auto px-4">
+      {posts?.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.map((post) => (
-            <div
-              key={post._id}
-              className="w-full sm:w-1/2 md:w-1/2 lg:w-1/2 px-2 mb-4"
-            >
-              <BlogPosts post={post} />
-            </div>
+            <BlogPosts key={post._id} post={post} />
           ))}
         </div>
       ) : (
-        <div>No posts found.</div>
+        <div className="text-center py-10 text-gray-500">No posts found</div>
       )}
     </div>
   );

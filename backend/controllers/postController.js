@@ -124,6 +124,35 @@ export const deletePost = async (req, res) => {
   }
 };
 
+export const getRandomPosts = async (req, res) => {
+  try {
+    const count = parseInt(req.query.count) || 5;
+    const posts = await Post.aggregate([
+      { $sample: { size: count } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+      {
+        $project: {
+          "user.password": 0,
+          "user.email": 0,
+        },
+      },
+    ]);
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.log("Error in getRandomPosts controller: ", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const getAllPosts = async (req, res) => {
   try {
     if (req.params.id) {

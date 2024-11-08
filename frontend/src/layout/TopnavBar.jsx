@@ -1,268 +1,323 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { TiWeatherSunny } from "react-icons/ti";
-import { MdOutlineDarkMode } from "react-icons/md";
-import { GiHamburgerMenu } from "react-icons/gi";
-import { IoIosSearch } from "react-icons/io";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { IoNotificationsSharp } from "react-icons/io5";
-import { TbLogin2 } from "react-icons/tb";
-import toast from "react-hot-toast";
-import Search from "../pages/Search";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Search,
+  Sun,
+  Moon,
+  Bell,
+  LogIn,
+  Menu,
+  Home,
+  Compass,
+  Users,
+  MessageCircle,
+  PenSquare,
+  X,
+  UserCircle,
+  LogOut,
+} from "lucide-react";
+import SearchModal from "../pages/Search";
 import userImage from "../assets/user.png";
-import Notification from "../pages/Notification";
 import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../context/ThemeContext";
 
 const TopnavBar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const [scrolled, setScrolled] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const { logout } = useAuth();
-
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem("darkMode");
-    return savedMode ? JSON.parse(savedMode) : false;
-  });
-
-  const toggleDarkMode = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    localStorage.setItem("darkMode", JSON.stringify(newMode));
-    document.documentElement.classList.toggle("dark", newMode);
-  };
+  const navigate = useNavigate();
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDarkMode);
+    const handleClickOutside = (event) => {
+      if (isDropdownOpen && !event.target.closest(".dropdown-container")) {
+        setIsDropdownOpen(false);
+      }
+      if (isMobileMenuOpen && !event.target.closest(".mobile-menu")) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isDropdownOpen, isMobileMenuOpen]);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
-    const handleKeyPress = (event) => {
-      if (event.ctrlKey && event.key === "k" && !showSearch) {
-        setShowSearch(true);
+    const handleKeyPress = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setShowSearch((prev) => !prev);
       }
     };
-
     document.addEventListener("keydown", handleKeyPress);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [showSearch, setShowSearch]);
-
-  const navigate = useNavigate();
-
-  const handleLoginClick = () => {
-    navigate("/login");
-  };
-  const handleExploreClick = () => {
-    navigate("/?explore=true");
-  };
-
-  const handleLogout = (e) => {
-    e.preventDefault();
-    logout.mutate();
-  };
+    return () => document.removeEventListener("keydown", handleKeyPress);
+  }, []);
 
   const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-
   const { data: posts } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
-      try {
-        const res = await fetch("/api/posts");
-        const data = await res.json();
+      const res = await fetch("/api/posts");
+      if (!res.ok) throw new Error("Failed to fetch posts");
+      return res.json();
+    },
+  });
 
-        if (!res.ok) {
-          throw new Error(data.error || "Something went wrong");
-        }
-        return data;
-      } catch (error) {
-        throw new Error(error);
-      }
+  const { data: notifications } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const res = await fetch("/api/notifications");
+      const data = await res.json();
+      if (!res.ok) throw new Error("Failed to fetch notifications");
+      return data;
     },
   });
 
   return (
-    <>
-      <nav className="dark:bg-[#212121] bg-white sticky top-0 z-50 border-y border-gray-900">
-        <div className="mx-auto max-w-8xl px-2 sm:px-6 lg:px-8">
-          <div className="relative flex h-16 items-center justify-between">
-            <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+    <nav
+      className={`fixed w-full top-0 z-50 transition-all duration-300 
+      ${scrolled ? "bg-white/80 backdrop-blur-xl shadow-lg" : "bg-white"} 
+      dark:bg-neutral-900/95 border-b dark:border-gray-800`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <div className="md:hidden">
               <button
-                type="button"
-                className="relative inline-flex items-center justify-center rounded-md p-2 dark:text-gray-400 dark:hover:text-white "
-                aria-controls="mobile-menu"
-                aria-expanded={isMobileMenuOpen}
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
               >
-                <span className="absolute -inset-0.5"></span>
-                <span className="sr-only">Open main menu</span>
-
-                <GiHamburgerMenu size={25} />
+                <Menu className="w-6 h-6" />
               </button>
             </div>
-            <div className="flex items-center sm:hidden ml-10 mb-1">
-              <Link to={"/"}>
-                <h1 className="h-8 w-auto text-2xl dark:text-white text-black font-bold">
-                  Blog
-                </h1>
+
+            <Link to="/" className="flex items-center space-x-3 ml-2 md:ml-0">
+              <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">
+                Blog
+              </span>
+            </Link>
+          </div>
+
+          <div className="hidden md:flex items-center space-x-8">
+            <NavLink to="/explore" icon={<Compass className="w-4 h-4" />}>
+              Explore
+            </NavLink>
+
+            <NavLink to="/about" icon={<Users className="w-4 h-4" />}>
+              About
+            </NavLink>
+            <NavLink to="/contact" icon={<MessageCircle className="w-4 h-4" />}>
+              Contact
+            </NavLink>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <ActionButton
+              icon={<Search className="w-5 h-5" />}
+              onClick={() => setShowSearch(true)}
+              tooltip="Search (⌘K)"
+            />
+
+            {authUser && (
+              <Link to="/notifications">
+                <ActionButton
+                  icon={<Bell className="w-5 h-5" />}
+                  tooltip="Notifications"
+                  badge={notifications?.length || "0"}
+                />
               </Link>
-            </div>
+            )}
 
-            <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start ">
-              <div className="flex flex-shrink-0 items-center">
-                <Link to={"/"}>
-                  <h1 className="h-8 w-auto text-2xl dark:text-white text-black font-bold hidden md:block">
-                    Blog
-                  </h1>
-                </Link>
-              </div>
-            </div>
+            <ActionButton
+              icon={
+                isDarkMode ? (
+                  <Sun className="w-5 h-5" />
+                ) : (
+                  <Moon className="w-5 h-5" />
+                )
+              }
+              onClick={toggleDarkMode}
+              tooltip="Toggle theme"
+            />
 
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-              <div className="flex items-center gap-2">
-                <button
-                  className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
-                  onClick={() => setShowSearch(!showSearch)}
+            {authUser ? (
+              <div className="relative group dropdown-container">
+                <div
+                  className="flex items-center space-x-1 cursor-pointer"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 >
-                  <span className="sr-only">Search</span>
-                  <IoIosSearch size={24} />
-                </button>
-                {authUser && (
-                  <button
-                    className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
-                    onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                  >
-                    <IoNotificationsSharp size={24} />
-                  </button>
-                )}
-                <button
-                  onClick={toggleDarkMode}
-                  className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white  "
-                >
-                  <span className="sr-only">Toggle dark mode</span>
-                  {isDarkMode ? (
-                    <TiWeatherSunny size={25} />
-                  ) : (
-                    <MdOutlineDarkMode size={25} />
-                  )}
-                </button>
-              </div>
-              {isNotificationOpen && <Notification />}
+                  <img
+                    src={authUser?.profileImg || userImage}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/20"
+                  />
+                </div>
 
-              {authUser ? (
-                <div className="relative ml-3">
-                  <div>
-                    <button
-                      type="button"
-                      className="relative flex rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white  text-sm "
-                      aria-expanded={isDropdownOpen}
-                      aria-haspopup="true"
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-neutral-900 rounded-xl shadow-lg py-2 ring-1 ring-black/5 dark:ring-white/10">
+                    <DropdownLink
+                      to={`/profile/${authUser?.username}`}
+                      icon={<UserCircle />}
                     >
-                      <span className="absolute -inset-1.5"></span>
-                      <span className="sr-only">Open user menu</span>
-                      <img
-                        className="h-8 w-8 rounded-full object-cover"
-                        src={authUser?.profileImg || userImage}
-                        alt="profile"
-                      />
+                      Profile
+                    </DropdownLink>
+                    <DropdownLink to="/create" icon={<PenSquare />}>
+                      Create Post
+                    </DropdownLink>
+                    <hr className="my-2 border-gray-100 dark:border-gray-700" />
+                    <button
+                      onClick={() => logout.mutate()}
+                      className="w-full flex items-center space-x-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign out</span>
                     </button>
                   </div>
-
-                  {isDropdownOpen && (
-                    <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <Link
-                        to={"/profile/" + authUser?.username}
-                        className="block px-4 py-2 text-sm text-gray-700"
-                      >
-                        Your Profile
-                      </Link>
-                      <Link
-                        to={"/create"}
-                        className="block px-4 py-2 text-sm text-gray-700"
-                      >
-                        Create Post
-                      </Link>
-                      <button
-                        className="block px-4 py-2 text-sm text-gray-700"
-                        onClick={handleLogout}
-                      >
-                        Sign out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <button
-                  className="relative rounded-full hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
-                  onClick={handleLoginClick}
-                >
-                  <span className="sr-only">Login</span>
-                  <TbLogin2 size={25} />
-                </button>
-              )}
-            </div>
+                )}
+              </div>
+            ) : (
+              <ActionButton
+                icon={<LogIn className="w-5 h-5" />}
+                onClick={() => navigate("/login")}
+                tooltip="Login"
+              />
+            )}
           </div>
         </div>
+      </div>
 
-        {isMobileMenuOpen && (
-          <div className="sm:hidden" id="mobile-menu">
-            <div className="space-y-1 px-2 pb-3 pt-2">
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-50 md:hidden mobile-menu"
+          aria-modal="true"
+        >
+          <div
+            className="fixed inset-0 bg-neutral-800/50 backdrop-blur-sm"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+
+          <div
+            className={`fixed inset-y-0 left-0 w-64 bg-white dark:bg-neutral-900 transform transition-transform duration-300 ease-in-out
+      ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}`}
+          >
+            <div className="flex items-center justify-between p-4 border-b dark:border-gray-800">
+              <Link
+                to="/"
+                className="flex items-center space-x-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-500 bg-clip-text text-transparent">
+                  Blog
+                </span>
+              </Link>
               <button
-                onClick={handleExploreClick}
-                className="block rounded-md  px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
-                aria-current="page"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="px-2 py-4 space-y-1">
+              <MobileNavLink
+                to="/explore"
+                icon={<Compass className="w-5 h-5" />}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 Explore
-              </button>
-              <Link
-                to={"/about"}
-                className="block rounded-md px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
+              </MobileNavLink>
+              <MobileNavLink
+                to="/about"
+                icon={<Users className="w-5 h-5" />}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                About us
-              </Link>
-              <Link
-                to={"/contact"}
-                className="block rounded-md px-3 py-2 text-base font-medium hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
+                About
+              </MobileNavLink>
+              <MobileNavLink
+                to="/contact"
+                icon={<MessageCircle className="w-5 h-5" />}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                Contact us
-              </Link>
+                Contact
+              </MobileNavLink>
             </div>
           </div>
-        )}
-
-        <hr className="h-px my-2 dark:bg-gray-200 border-0 bg-gray-400 max-w-[95%] mx-auto hidden md:block" />
-
-        <div className="hidden sm:ml-6 sm:block">
-          <div className="flex flex-row gap-7">
-            <button
-              onClick={handleExploreClick}
-              className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
-              aria-current="page"
-            >
-              Explore
-            </button>
-            <Link
-              to={"/about"}
-              className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
-            >
-              About us
-            </Link>
-            <Link
-              to={"/contact"}
-              className="rounded-md px-3 mb-2 text-[13px] font-bold hover:text-gray-500 dark:text-gray-400 text-black dark:hover:text-white "
-            >
-              Contact us
-            </Link>
-          </div>
         </div>
-      </nav>
-      <Search show={showSearch} setShow={setShowSearch} posts={posts || []} />
-    </>
+      )}
+
+      {showSearch && (
+        <SearchModal
+          show={showSearch}
+          setShow={setShowSearch}
+          posts={posts || []}
+        />
+      )}
+    </nav>
   );
 };
+
+const NavLink = ({ to, children, icon }) => (
+  <Link
+    to={to}
+    className="flex items-center space-x-2 text-gray-700 hover:text-indigo-600 dark:text-gray-300 
+    dark:hover:text-indigo-400 transition-colors duration-200 text-sm font-medium"
+  >
+    {icon}
+    <span>{children}</span>
+  </Link>
+);
+
+const MobileNavLink = ({ to, children, icon, onClick }) => (
+  <Link
+    to={to}
+    onClick={onClick}
+    className="flex items-center space-x-3 w-full px-4 py-3 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50 rounded-lg dark:text-gray-300 dark:hover:text-indigo-400 dark:hover:bg-gray-800/50 transition-colors duration-200"
+  >
+    {icon}
+    <span>{children}</span>
+  </Link>
+);
+
+const ActionButton = ({ icon, onClick, tooltip, badge }) => (
+  <button
+    className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 
+    transition-all duration-200 group"
+    onClick={onClick}
+  >
+    {icon}
+    {badge && (
+      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+        {badge}
+      </span>
+    )}
+    <span
+      className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 
+    bg-gray-800 text-white px-3 py-1.5 rounded-lg text-sm opacity-0 group-hover:opacity-100 
+    transition-opacity duration-200 whitespace-nowrap pointer-events-none"
+    >
+      {tooltip}
+    </span>
+  </button>
+);
+
+const DropdownLink = ({ to, children, icon }) => (
+  <Link
+    to={to}
+    className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 
+    hover:bg-gray-100 dark:hover:bg-gray-700/50"
+  >
+    {icon}
+    <span>{children}</span>
+  </Link>
+);
 
 export default TopnavBar;

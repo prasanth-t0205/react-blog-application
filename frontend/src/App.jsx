@@ -11,10 +11,14 @@ import EditPost from "./pages/Create_Edit_Post/EditPost";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import BlogPostPage from "./pages/blog/BlogPostPage";
 import AboutPage from "./pages/AboutPage";
+import { ThemeProvider } from "./context/ThemeContext";
+import ExplorePage from "./pages/ExporePage";
+import NotificationPage from "./pages/Notification";
+import ContactPage from "./pages/ContactPage";
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
-    queryKey: ["authUser"], // this key will be used in the query cache and dont need to writ the below code every single time we want to access the auth user
+    queryKey: ["authUser"],
     queryFn: async () => {
       try {
         const res = await fetch("/api/auth/me");
@@ -40,8 +44,16 @@ function App() {
     );
 
   return (
-    <>
+    <ThemeProvider>
       <Routes>
+        <Route
+          path="/login"
+          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/signup"
+          element={!authUser ? <Signup /> : <Navigate to="/" />}
+        />
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route
@@ -52,25 +64,20 @@ function App() {
             path="/profile/:username"
             element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
           />
-          <Route
-            path="/login"
-            element={!authUser ? <LoginPage /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/signup"
-            element={!authUser ? <Signup /> : <Navigate to="/" />}
-          />
+          <Route path="/explore" element={<ExplorePage />} />
+          <Route path="/notifications" element={<NotificationPage />} />
           <Route
             path="/editpost/:id"
             element={authUser ? <EditPost /> : <Navigate to="/login" />}
           />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blog/:id" element={<BlogPostPage />} />
           <Route path="/blog/:title" element={<BlogPostPage />} />
           <Route path="*" element={<PageNotFound />} />
         </Route>
       </Routes>
-    </>
+    </ThemeProvider>
   );
 }
 

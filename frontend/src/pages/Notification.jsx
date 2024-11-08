@@ -1,23 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import userImage from "../assets/user.png";
-import { MdDelete } from "react-icons/md";
+import { Link } from "react-router-dom";
+import { Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import userImage from "../assets/user.png";
 
-const Notification = () => {
+const NotificationPage = () => {
   const queryClient = useQueryClient();
   const { data: notifications } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
-      try {
-        const res = await fetch("/api/notifications");
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || "Something went wrong");
-        }
-        return data;
-      } catch (error) {
-        throw new Error(error);
-      }
+      const res = await fetch("/api/notifications");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Something went wrong");
+      return data;
     },
   });
 
@@ -30,55 +25,64 @@ const Notification = () => {
       return res.json();
     },
     onSuccess: () => {
-      toast.success("Notification deleted successfully");
+      toast.success("Notification deleted");
       queryClient.invalidateQueries(["notifications"]);
     },
-    onError: (error) => toast.error(error.message),
   });
 
-  const { mutate: deleteAllNotifications } = useMutation({
+  const { mutate: clearAllNotifications } = useMutation({
     mutationFn: async () => {
       const res = await fetch("/api/notifications", { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete all notifications");
+      if (!res.ok) throw new Error("Failed to clear notifications");
       return res.json();
     },
     onSuccess: () => {
-      toast.success("All notifications deleted");
+      toast.success("All notifications cleared");
       queryClient.invalidateQueries(["notifications"]);
     },
-    onError: (error) => toast.error(error.message),
   });
 
-  if (!notifications) return null;
   return (
-    <div className="absolute right-0 top-full z-10 mt-1 w-80 origin-top-right rounded-md bg-white dark:bg-[#181818] py-0 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-      <div className="max-h-96 overflow-y-auto">
-        <div className="flex items-center justify-between p-2">
-          <h2 className="font-bold text-sm ml-1 mt-1">Notification</h2>
-          <MdDelete
-            className="text-2xl cursor-pointer"
-            onClick={deleteAllNotifications}
-            size={20}
-          />
-        </div>
-        <div className="flex flex-col space-y-2 p-2">
-          {notifications.map((notification) => (
+    <div className="pt-20 px-4 md:px-8 max-w-3xl mx-auto">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Notifications</h1>
+        {notifications?.length > 0 && (
+          <button
+            onClick={() => clearAllNotifications()}
+            className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Clear All</span>
+          </button>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        {notifications?.length === 0 ? (
+          <div className="text-center py-12 bg-white dark:bg-neutral-800 rounded-xl">
+            <p className="text-gray-500 dark:text-gray-400">
+              No notifications yet
+            </p>
+          </div>
+        ) : (
+          notifications?.map((notification) => (
             <div
               key={notification._id}
-              className="flex flex-col p-3 bg-white dark:bg-[#212121] shadow-sm hover:shadow-md rounded-lg"
+              className="bg-white dark:bg-neutral-800 p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200"
             >
               <div className="flex items-center justify-between">
-                <div className="flex items-center">
+                <Link
+                  to={`/profile/${notification.from.username}`}
+                  className="flex items-center space-x-3"
+                >
                   <img
                     src={notification.from.profileImg || userImage}
                     alt=""
-                    className="w-6 h-6 rounded-full"
+                    className="w-10 h-10 rounded-full object-cover"
                   />
-                  <div className="flex flex-col ml-3">
-                    <div className="text-xs leading-none">
-                      {notification.from.username}
-                    </div>
-                    <p className="text-[10px] text-gray-600 leading-none mt-1">
+                  <div>
+                    <p className="font-medium">{notification.from.username}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {notification.type === "follow" &&
                         "started following you"}
                       {notification.type === "comment" &&
@@ -86,25 +90,20 @@ const Notification = () => {
                       {notification.type === "post" && "made a new post"}
                     </p>
                   </div>
-                </div>
+                </Link>
                 <button
                   onClick={() => deleteNotification(notification._id)}
-                  className="flex-shrink-0 px-3 py-1 text-xs shadow-sm hover:shadow-md font-medium tracking-wider text-red-600 rounded-full"
+                  className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                 >
-                  <MdDelete size={20} />
+                  <Trash2 className="w-5 h-5" />
                 </button>
               </div>
             </div>
-          ))}
-        </div>
+          ))
+        )}
       </div>
-      {notifications.length === 0 && (
-        <div className="flex items-center justify-center p-2">
-          <p className="text-sm text-gray-500">No notifications !!!</p>
-        </div>
-      )}
     </div>
   );
 };
 
-export default Notification;
+export default NotificationPage;

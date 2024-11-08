@@ -1,61 +1,52 @@
-import React from "react";
 import { Link } from "react-router-dom";
+import userImage from "../../assets/user.png";
 
-const BlogPosts = ({ post, onView }) => {
+const BlogPosts = ({ post }) => {
   if (!post) return null;
 
   const postOwner = post.user;
   const formatedDate = new Date(post.createdAt);
 
-  const truncateContent = (content, maxLength) => {
-    if (content.length <= maxLength) return content;
-    return content.substr(0, maxLength) + "...";
-  };
-
-  const handleClick = () => {
-    onView(post._id);
-  };
-
   return (
-    <div className="container max-w-[50rem]  mx-auto" onClick={handleClick}>
-      <div className="relative flex-col bg-clip-border rounded bg-transparent text-gray-700 shadow-none grid gap-2 item sm:grid-cols-2">
-        <div className="relative bg-clip-border rounded overflow-hidden bg-white text-gray-700 shadow-lg m-0 h-64">
+    <div className="group relative h-[300px] overflow-hidden rounded-xl">
+      <img
+        src={post.img}
+        alt={post.title}
+        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+      />
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+          <div className="flex items-center gap-2 mb-2">
+            <Link
+              to={`/profile/${postOwner.username}`}
+              className="flex items-center gap-2"
+            >
+              <img
+                src={postOwner.profileImg || userImage}
+                alt={postOwner.username}
+                className="w-8 h-8 rounded-full border border-white/20"
+              />
+              <span className="text-sm font-medium">@{postOwner.username}</span>
+            </Link>
+          </div>
+
           <Link to={`/blog/${post._id}`}>
-            <img
-              src={post.img}
-              alt="Revolutionizing Our Production Process"
-              className="object-cover w-full h-full"
+            <h2 className="text-lg font-bold mb-2 line-clamp-2">
+              {post.title}
+            </h2>
+
+            <div
+              className="text-sm text-gray-200 mb-3 line-clamp-2 prose prose-sm prose-invert"
+              dangerouslySetInnerHTML={{ __html: post.content }}
             />
           </Link>
-        </div>
-        <div className="p-6 px-2 sm:pr-6 sm:pl-4">
-          <p className="block antialiased font-sans text-sm font-light leading-normal text-inherit mb-4 ">
-            {post.category}
-          </p>
-          <Link
-            to={`/blog/${post._id}`}
-            className="block antialiased tracking-normal font-sans text-xl font-semibold leading-snug text-blue-gray-900 mb-2 normal-case transition-colors hover:text-gray-700"
-          >
-            {post.title.length > 38
-              ? post.title.substring(0, 38) + "..."
-              : post.title}
-          </Link>
-          <p
-            className="block antialiased font-sans text-base leading-relaxed text-inherit mb-5 font-normal !text-gray-500"
-            dangerouslySetInnerHTML={{
-              __html: truncateContent(post.content, 150),
-            }}
-          />
 
-          <div className="flex items-center gap-2">
-            <p className="block antialiased font-sans text-base font-light leading-relaxed text-blue-gray-900 mb-0.5 ">
-              <Link to={`/profile/${postOwner.username}`}>
-                @{postOwner.username}
-              </Link>
-            </p>
-            <p className="block antialiased font-sans text-sm leading-normal text-gray-700 font-normal">
-              {formatedDate.toDateString()}
-            </p>
+          <div className="flex items-center justify-between">
+            <span className="text-sm bg-white/20 px-2 py-1 rounded">
+              {post.category}
+            </span>
+            <span className="text-sm">{formatedDate.toDateString()}</span>
           </div>
         </div>
       </div>

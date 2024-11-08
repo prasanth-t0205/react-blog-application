@@ -1,43 +1,27 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
-const BlogCard = ({ post, onView }) => {
+const BlogCard = ({ post }) => {
   if (!post) return null;
-  const truncateContent = (content, maxLength) => {
-    if (content.length <= maxLength) return content;
-    return content.substr(0, maxLength) + "...";
-  };
-  const handleClick = () => {
-    onView(post._id);
-  };
+
   return (
-    <div
-      className="max-w-sm  rounded overflow-hidden shadow-lg dark:bg-[#212121]"
-      onClick={handleClick}
-    >
-      <div className="m-0 h-64">
+    <div className="bg-white dark:bg-neutral-800 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+      <Link to={`/blog/${post._id}`}>
+        <img
+          src={post.img}
+          alt={post.title}
+          className="w-full h-48 object-cover rounded-t-xl"
+        />
+      </Link>
+      <div className="p-4">
+        <span className="text-sm text-indigo-600 dark:text-indigo-400">
+          {post.category}
+        </span>
         <Link to={`/blog/${post._id}`}>
-          <img
-            className="object-cover w-full h-full"
-            src={post.img}
-            alt="Sunset in the mountains"
-          />
+          <h2 className="text-xl font-semibold mt-2">{post.title}</h2>
         </Link>
-      </div>
-      <div className="px-6 py-4">
-        <Link to={`/blog/${post._id}`}>
-          {" "}
-          <div className="font-bold text-xl mb-2">
-            {post.title.length > 30
-              ? post.title.substring(0, 30) + "..."
-              : post.title}
-          </div>
-        </Link>
-        <p
-          className="text-gray-700 dark:text-gray-400 text-base"
-          dangerouslySetInnerHTML={{
-            __html: truncateContent(post.content, 150),
-          }}
+        <div
+          className="text-gray-600 dark:text-gray-300 mt-2 line-clamp-2 prose dark:prose-invert"
+          dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </div>
     </div>

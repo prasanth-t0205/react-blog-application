@@ -10,11 +10,13 @@ import {
   editPost,
   commentPost,
   deleteComment,
+  getRandomPosts,
 } from "../controllers/postController.js";
 
 const router = express.Router();
 
 router.get("/", getAllPosts);
+router.get("/random", getRandomPosts);
 router.get("/:id", getSinglePost);
 router.get("/following/:username", protectRoute, getFollowingPosts);
 router.get("/user/:username", protectRoute, getUserPosts);
